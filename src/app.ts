@@ -2,7 +2,7 @@
 import express from 'express'
 import cors from 'cors'
 import notesRoutes from './routes/notes'
-
+import authRoutes from './routes/auth'
 const app = express()
 
 app.use(cors())
@@ -23,6 +23,7 @@ app.get('/', (req, res) => {
   })
 })
 
+app.use('/api/auth', authRoutes)
 app.use('/api/notes', notesRoutes)
 
 export default app

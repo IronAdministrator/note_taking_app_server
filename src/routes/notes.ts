@@ -1,13 +1,13 @@
-// src/routes/notes.ts
-import { Router } from 'express'
+import { Router, Request, Response } from 'express'
 import Note from '../models/Note'
-
+import { requireAuth } from '../middleware/auth'
 const router = Router()
 
 // GET all notes
-router.get('/', async (req, res) => {
+router.get('/', requireAuth, async (req: Request, res: Response): Promise<void> => {
   try {
-    const notes = await Note.find().sort({ updatedAt: -1 })
+    const userId = (req as any).user.userId
+    const notes = await Note.find({ userId }).sort({ updatedAt: -1 })
     res.json(notes)
   } catch (error) {
     res.status(500).json({ error: 'Server error' })
@@ -15,10 +15,11 @@ router.get('/', async (req, res) => {
 })
 
 // CREATE a new note
-router.post('/', async (req, res) => {
+router.post('/', requireAuth, async (req: Request, res: Response): Promise<void> => {
   try {
     const { title, text } = req.body
-    const note = new Note({ title, text })
+    const userId = (req as any).user.userId
+    const note = new Note({ title, text, userId })
     const savedNote = await note.save()
     res.json(savedNote)
   } catch (error) {
@@ -27,7 +28,7 @@ router.post('/', async (req, res) => {
 })
 
 // UPDATE a note
-router.put('/:id', async (req, res) => {
+router.put('/:id', requireAuth, async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params
     const { title, text } = req.body
@@ -43,7 +44,7 @@ router.put('/:id', async (req, res) => {
 })
 
 // DELETE a note
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', requireAuth, async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params
     await Note.findByIdAndDelete(id)
